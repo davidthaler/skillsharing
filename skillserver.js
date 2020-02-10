@@ -36,7 +36,46 @@ class SkillServer{
     stop(){
         this.server.close()
     }
+
+    talkResponse(){
+       let talks = Object.values(this.talks)
+        return {
+            body: JSON.stringify(talks),
+            headers: {'Content-Type': 'application/json',
+                      'ETag' : `"${this.version}"`}
+        }
+    }
+
+    waitForChanges(time){
+        return new Promise(resolve => {
+            this.waiting.push(resolve)
+            setTimeout( () => {
+                if(!this.waiting.includes(resolve)) return
+                this.waiting = this.waiting.filter(r => r != resolve)
+                resolve({status: 304})
+            }, time * 1000)
+        })
+    }
+
+    updated(){
+        this.version++
+        let response = this.talkResponse()
+        this.waiting.forEach(resolve => resolve(response))
+        this.waiting = []
+    }
 }
+
+router.add('GET', /^\/talks$/, async (server, request) => {
+    let tag = /"(.*)"/.exec(request.headers['if-none-match'])
+    let wait = /\bwait=(\d+)/.exec(request.headers['prefer'])
+    if(!tag || tag[1] != server.version){
+        return server.talkResponse()
+    }else if(!wait){
+        return {status: 304}
+    }else{
+        return server.waitForChanges(Number(wait[1]))
+    }
+})
 
 const talkPath = /^\/talks\/([^\/]+)$/;
 router.add('GET', talkPath, async (server, title) => {
@@ -53,7 +92,7 @@ router.add('GET', talkPath, async (server, title) => {
 router.add('DELETE', talkPath, async(server, title) => {
     if(title in server.talks){
         delete server.talks[title]
-        // server.updated()
+        server.updated()
     }
     return {status: 204}
 })
@@ -84,10 +123,11 @@ router.add('PUT', talkPath, async(server, title, request) => {
                             presenter:talk.presenter, 
                             summary:talk.summary, 
                             comments:[]}
-    // server.updated()
+    server.updated()
     return {status: 204}
 })
 
+// MH uses /^\/talks\/([^\/]+)\/comments$/ instead of talkPath
 router.add('POST', talkPath, async(server, title, request) => {
     let requestBody = await readStream(request)
     let comment
@@ -102,7 +142,7 @@ router.add('POST', talkPath, async(server, title, request) => {
             return {status: 400, body: 'Bad Comment\n'}
         }else if(title in server.talks){
             server.talks[title].comments.push(comment)
-            // server.updated()
+            server.updated()
             return {status: 204}
         }else{
             return {status:404, body:`No talk found: ${title}`}
