@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/davidthaler/skillsharing/issues"
   },
-  "homepage": "https://github.com/davidthaler/skillsharing#readme"
+  "homepage": "https://github.com/davidthaler/skillsharing#readme",
+  "dependencies": {
+    "ecstatic": "^4.1.2"
+  }
 }
