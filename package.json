@@ -1,6 +1,6 @@
 {
   "name": "skillsharing",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Skill sharing website from chapter 21 of Eloquent Javascript",
   "main": "skillserver.js",
   "scripts": {
