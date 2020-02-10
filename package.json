@@ -1,0 +1,25 @@
+{
+  "name": "skillsharing",
+  "version": "1.0.0",
+  "description": "Skill sharing website from chapter 21 of Eloquent Javascript",
+  "main": "skillserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidthaler/skillsharing.git"
+  },
+  "keywords": [
+    "node",
+    "nodejs",
+    "javascript",
+    "long-polling"
+  ],
+  "author": "David Thaler/Marijn Haverbeke",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidthaler/skillsharing/issues"
+  },
+  "homepage": "https://github.com/davidthaler/skillsharing#readme"
+}
