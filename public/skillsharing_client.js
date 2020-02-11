@@ -110,15 +110,35 @@ function renderTalkForm(dispatch) {
     let title = elt("input", {type: "text"});
     let summary = elt("input", {type: "text"});
     return elt("form", {
-      onsubmit(event) {
-        event.preventDefault();
-        dispatch({type: "newTalk",
-                  title: title.value,
-                  summary: summary.value});
-        event.target.reset();
-      }
-    }, elt("h3", null, "Submit a Talk"),
-       elt("label", null, "Title: ", title),
-       elt("label", null, "Summary: ", summary),
-       elt("button", {type: "submit"}, "Submit"));
-  }
+            onsubmit(event) {
+                event.preventDefault();
+                dispatch({type: "newTalk",
+                        title: title.value,
+                        summary: summary.value});
+                event.target.reset();
+            }
+        }, elt("h3", null, "Submit a Talk"),
+        elt("label", null, "Title: ", title),
+        elt("label", null, "Summary: ", summary),
+        elt("button", {type: "submit"}, "Submit"));
+}
+
+async function pollTalks(update){
+    let tag = undefined
+    for(;;){
+        let response
+        try{
+            response = await fetchOK('/talks', {
+                headers: tag && {'If-None-Match' : tag,
+                                 'Prefer': 'wait=90'}
+            })
+        }catch(e){
+            console.error('Request failed: ' + e)
+            await new Promise(resolve => setTimeout(resolve, 500))
+            continue
+        }
+        if(response.status == 304) continue
+        tag = response.headers.get("Etag")
+        update(await response.json())
+    }
+}
