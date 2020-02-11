@@ -127,8 +127,7 @@ router.add('PUT', talkPath, async(server, title, request) => {
     return {status: 204}
 })
 
-// MH uses /^\/talks\/([^\/]+)\/comments$/ instead of talkPath
-router.add('POST', talkPath, async(server, title, request) => {
+router.add('POST', /^\/talks\/([^\/]+)\/comments$/ , async(server, title, request) => {
     let requestBody = await readStream(request)
     let comment
     try{
