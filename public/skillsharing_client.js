@@ -31,10 +31,10 @@ function handleAction(state, action){
                 presenter: state.user,
                 summary: action.summary
             })
-        }).catch(reportError)
+        }).catch(() => {debugger; reportError()})
     }else if(action.type == 'deleteTalk'){
         fetchOK(talkURL(action.talk), {method: 'DELETE'})
-            .catch(reportError)
+            .catch(() => {debugger; reportError()})
     }else if(action.type == 'newComment'){
         fetchOK(talkURL(action.talk) + '/comments', {
             method: 'POST',
@@ -43,25 +43,28 @@ function handleAction(state, action){
                 author: state.user,
                 message: action.message
             })
-        }).catch(reportError)
+        }).catch(() => {debugger; reportError()})
     }
     return state
 }
 
 
 // View code
-function elt(type, props, ...children){
-    let dom = document.createElement(type)
-    if(props) Object.assign(dom, props)
-    for(let child of children){
-        if(typeof child == 'string') {
-            dom.appendChild(document.createTextNode(child))
-        }else{
-            dom.appendChild(child)
+function elt(type, props, ...children) {
+    let dom = document.createElement(type);
+    if (props) Object.assign(dom, props);
+    for (let child of children) {
+        try{
+            if (typeof child != "string"){
+                dom.appendChild(child);
+            }else{
+                dom.appendChild(document.createTextNode(child));
+            }
+        }catch(e){
+            debugger
         }
-        
     }
-    return dom
+    return dom;
 }
 
 function renderUserField(name, dispatch){
@@ -76,7 +79,7 @@ function renderUserField(name, dispatch){
 }
 
 function renderComment(comment){
-    elt('p', {className:'comment'},
+    return elt('p', {className:'comment'},
         elt('strong', null, comment.author),': ', comment.message)
 }
 
@@ -138,7 +141,7 @@ async function pollTalks(update){
             continue
         }
         if(response.status == 304) continue
-        tag = response.headers.get("Etag")
+        tag = response.headers.get("ETag")
         update(await response.json())
     }
 }
@@ -156,18 +159,22 @@ class SkillShareApp{
     }
 
     syncState(state){
-        if(state.talks == this.talks) return
-        this.talkDOM.textContent = ''
-        for(let talk of state.talks){
-            this.talkDOM.appendChild(renderTalk(talk, this.dispatch))
+        if (state.talks != this.talks) {
+            this.talkDOM.textContent = "";
+            for (let talk of state.talks) {
+              this.talkDOM.appendChild(
+                renderTalk(talk, this.dispatch));
+            }
+            this.talks = state.talks;
+          }
         }
-        this.talks = state.talks
-    }
 }
+
+let state
 
 function runApp(){
     let user = localStorage.getItem('userName') || 'Anonymous'
-    let state, app
+    let app
 
     function dispatch(action){
         state = handleAction(state, action)
@@ -182,7 +189,7 @@ function runApp(){
         }else{
             dispatch({type:'setTalks', talks})
         }
-    }).catch(reportError)
+    }).catch((e) => {debugger; reportError(e)})
 }
 
 runApp()
