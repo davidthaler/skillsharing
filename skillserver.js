@@ -148,4 +148,4 @@ router.add('POST', /^\/talks\/([^\/]+)\/comments$/ , async(server, title, reques
         }
 })
 
-new SkillServer({"smalltalk": {presenter:"Me", summary:"derp", comments:[]}}).start(8000)
+new SkillServer(Object.create(null)).start(8000)
