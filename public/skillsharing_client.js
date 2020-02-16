@@ -31,10 +31,10 @@ function handleAction(state, action){
                 presenter: state.user,
                 summary: action.summary
             })
-        }).catch(() => {debugger; reportError()})
+        }).catch(reportError)
     }else if(action.type == 'deleteTalk'){
         fetchOK(talkURL(action.talk), {method: 'DELETE'})
-            .catch(() => {debugger; reportError()})
+            .catch(reportError)
     }else if(action.type == 'newComment'){
         fetchOK(talkURL(action.talk) + '/comments', {
             method: 'POST',
@@ -43,7 +43,7 @@ function handleAction(state, action){
                 author: state.user,
                 message: action.message
             })
-        }).catch(() => {debugger; reportError()})
+        }).catch(reportError)
     }
     return state
 }
@@ -54,14 +54,10 @@ function elt(type, props, ...children) {
     let dom = document.createElement(type);
     if (props) Object.assign(dom, props);
     for (let child of children) {
-        try{
-            if (typeof child != "string"){
-                dom.appendChild(child);
-            }else{
-                dom.appendChild(document.createTextNode(child));
-            }
-        }catch(e){
-            debugger
+        if (typeof child != "string"){
+            dom.appendChild(child);
+        }else{
+            dom.appendChild(document.createTextNode(child));
         }
     }
     return dom;
@@ -189,7 +185,7 @@ function runApp(){
         }else{
             dispatch({type:'setTalks', talks})
         }
-    }).catch((e) => {debugger; reportError(e)})
+    }).catch(reportError)
 }
 
 runApp()
